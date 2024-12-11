@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import java.net.URI;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CashcardApplicationTests {
 	@Autowired
@@ -42,10 +44,15 @@ class CashcardApplicationTests {
 
 	@Test
 	void shouldCreateANewCashCard() {
-		CashCard cashCard = new CashCard(null, 250.00);
-		ResponseEntity<Void> response = restTemplate.postForEntity("/cashcards", cashCard, Void.class);
+		CashCard newCashCard = new CashCard(null, 250.00);
+		ResponseEntity<Void> postResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
 
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(postResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+		URI locationOfNewCashCard = postResponse.getHeaders().getLocation();
+		ResponseEntity<String> getResponse = restTemplate.getForEntity(locationOfNewCashCard, String.class);
+
+		assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 	
 	@Test
